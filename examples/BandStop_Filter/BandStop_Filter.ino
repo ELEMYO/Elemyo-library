@@ -68,7 +68,7 @@ void loop() {
   sensorValueBandStop = MyoSensor.BandStop(sensorValue, 50, 4);
 
   // print the results to the Serial Monitor:
-  Serial.println(sensorValue);
+  Serial.print(sensorValue);
   Serial.print(" ");
   Serial.println(sensorValueBandStop);
 
