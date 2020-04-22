@@ -32,13 +32,13 @@ THE SOFTWARE.
 
 Wiring the ELEMYO sensor to an Arduino UNO
 
-ELEMYO -->  UNO
+ELEMYO -->  Arduino
   +        5V
   -        GND
   S        analog pin A0 (or other analog input)
-  СS       diginal pin 10  (SS pin)
-  SDI      diginal pin 11  (MOSI pin)
-  CLK      diginal pin 13  (SCK pin)
+  СS       pin 10 (SS pin)
+  MOSI     pin 11 (UNO, Nano, Mini), pin 51 (Mega), pin SI (Leonardo), pin 16 (Pro micro)
+  SCK      pin 13 (UNO, Nano, Mini), pin 52 (Mega), pin SCK (Leonardo), pin 15 (Pro micro)
 
 
 */
