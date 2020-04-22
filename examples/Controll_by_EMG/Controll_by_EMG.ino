@@ -4,6 +4,7 @@
 //
 // Changelog:
 //     2020-02-24 - initial release
+//     2020-04-22 - BandStop filter added
 
 /* ============================================
 ELEMYO library code is placed under the MIT license
@@ -112,11 +113,12 @@ void loop() {
 
 short getMaxAmplitude(short N)
 {
-  short MAX = analogRead(sensorInPin);
-  short MIN = analogRead(sensorInPin);
+  short MAX = 0;
+  short MIN = 1024;
   for (short i = 0; i < N; i++)
   {
-    short temp = analogRead(sensorInPin);
+    short temp = MyoSensor.BandStop(analogRead(sensorInPin), 50, 4);
+    temp = MyoSensor.BandStop(temp, 100, 6);
     if (temp > MAX)
         MAX = temp;
     if (temp < MIN)
