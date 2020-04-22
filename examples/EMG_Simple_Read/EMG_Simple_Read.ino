@@ -3,7 +3,8 @@
 //  2018-04-18 by ELEMYO (https://github.com/ELEMYO/Elemyo-library)
 //
 // Changelog:
-//     20120-02-24 - initial release
+//     2020-02-24 - initial release
+//     2020-04-22 - BandStop filter added
 
 /* ============================================
 ELEMYO library code is placed under the MIT license
@@ -35,7 +36,7 @@ ELEMYO -->  Arduino
   +        5V
   -        GND
   S        analog pin A0 (or other analog input)
-  СS       diginal pin 10  (SS pin)
+  СS       pin 10 (SS pin)
   MOSI     pin 11 (UNO, Nano, Mini), pin 51 (Mega), pin SI (Leonardo), pin 16 (Pro micro)
   SCK      pin 13 (UNO, Nano, Mini), pin 52 (Mega), pin SCK (Leonardo), pin 15 (Pro micro)
 
@@ -63,6 +64,11 @@ void setup() {
 void loop() {
   // read the analog in value:
   sensorValue = analogRead(sensorInPin);
+  
+   // notch 50 Hz filter with band window 4 Hz
+  sensorValue = MyoSensor.BandStop(sensorValue, 50, 4);
+  // notch 100 Hz (one of 50 Hz mode) filter with band window 6 Hz
+  sensorValue = MyoSensor.BandStop(sensorValue, 100, 6);
 
   // print the results to the Serial Monitor:
   Serial.println(sensorValue);
