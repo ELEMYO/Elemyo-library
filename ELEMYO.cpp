@@ -37,9 +37,9 @@ void BANDSTOP::INITIAL(){
 	Y[2] = 0;
 	//-------------------------------------------------------------------
 
-	T = 0;		// initialize of Time
-	f = 0;		// initialize of notch frequency
-	BW = 0;		// initialize of band stop window
+	T = 0;		// initialization of time
+	f = 0;		// initialization of notch frequency
+	BW = 0;		// initialization of band stop window
 }
 
 int ELEMYO::BandStop (int sensorValue, float f, float BW)
@@ -105,7 +105,7 @@ void LOWPASS::INITIAL(){
 	Y[6] = 0;
 	//---------------------------------------------------------------------------------
 
-	T = 0;			// initialization of Time
+	T = 0;			// initialization of time
 	f = 0;			// initialization of cutoff friquency
 }
 
@@ -261,7 +261,7 @@ void BANDPASS::INITIAL(){
 	Y[8] = 0;
 	//----------------------------------------------------------------------------------
 
-	T = 0;			// initialization of Time
+	T = 0;			// initialization of time
 	fl = 0;			// initialization of lower cutoff friquency
 	fh = 0;			// initialization of upper cutoff friquency
 }
