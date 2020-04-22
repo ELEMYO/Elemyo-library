@@ -5,6 +5,7 @@
 //
 // Changelog:
 //     2020-02-24 - initial release
+//     2020-04-22 - BandStop filter added
 
 /* ============================================
 ELEMYO library code is placed under the MIT license
@@ -71,6 +72,10 @@ void setup() {
 void loop() {
   // read the analog in value:
   signalValue = analogRead(A0);
+  // notch 50 Hz filter with band window 4 Hz.
+  signalValue = MyoSensor.BandStop(signalValue, 50, 4);
+  // notch 100 Hz (one of 50 Hz mode) filter with band window 6 Hz
+  signalValue = MyoSensor.BandStop(signalValue, 100, 6);
 
   // rectification of the signal
   if (signalValue < siganlReference)
