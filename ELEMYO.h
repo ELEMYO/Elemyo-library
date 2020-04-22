@@ -18,22 +18,66 @@
 	#define x16    B110           // x16 gain
 	#define x32    B111           // x32 gain
 
-	class ELEMYO {
+	class BANDSTOP {
 		public:
-			ELEMYO(byte CS);		// initiate object
-			void gain(byte value);		// change gain
-            		float X[2] = {0, 0};		// array for BandStop filter with x(n-1) and x(n-2) values
-            		float Y[3] = {0, 0, 0};		// array for BandStop filter with y(n), y(n-1) and y(n-2) values
-	    		long T = 0;			// time in microseconds for BandStop filter
+			float X[2] = {0, 0};				// array for BandStop filter with x(n-1) and x(n-2) values
+            		float Y[3] = {0, 0, 0};				// array for BandStop filter with y(n), y(n-1) and y(n-2) values
+	    		long T = 0;					// time in microseconds for BandStop filter
+			float f = 0;					// notch frequency in Hz
+			float BW = 0;					// notch window in Hz
+
+			void INITIAL();					// initilisation
+	};
+
+	class LOWPASS {
+		public:
+            		float X[6] = {0, 0, 0, 0, 0, 0};		// array for LowPass filter with x(n-1) ... x(n-6) values
+            		float Y[7] = {0, 0, 0, 0, 0, 0, 0};		// array for LowPass filter with y(n) ... y(n-6) values
+			long T = 0;					// time in microseconds for LowPass filter
+			float f = 0;					// cutoff frequency in Hz
 			
-			// BandStop filter, sensorValue - signal value, f - notch frequency in Hz, BW - BandStop filter window in Hz
-			int BandStop (int sensorValue, int f, float BW);	
+			void INITIAL();					// initilisation
+	};
+
+	class BANDPASS {
+		public:
+            		float X[8] = {0, 0, 0, 0, 0, 0, 0, 0};		// array for BandPass filter with x(n-1) ... x(n-8) values
+            		float Y[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};	// array for BandPass filter with y(n) ... y(n-8) values
+			long T = 0;					// time in microseconds for BandPass filter
+			float fl = 0;					// lower cutoff frequency in Hz
+			float fh = 0;					// upper cutoff frequency in Hz
+
+			void INITIAL();					// initilisation
+	};
+
+	class ELEMYO {
+		public:		
+			ELEMYO(byte CS);				// initiate object
+			void gain(byte value);				// change gain
+
+			int LengthBS = 0;				// number of BandStop filters with different notch frequency
+			BANDSTOP *BS = (BANDSTOP *)malloc(1);		// array of BandStop filters with different notch frequency
+
+			int LengthLP = 0;				// number of LowPass filters with different cutoff frequency
+			LOWPASS *LP= (LOWPASS *)malloc(1);		// array of LowPass filters with different cutoff frequency
+
+			int LengthBP = 0;				// number of LowPass filters with different lower or upper cutoff frequencys
+			BANDPASS *BP= (BANDPASS *)malloc(1);		// array of LowPass filters with different lower or upper cutoff frequencys
+
+			// BandStop filter, "sensorValue" - signal value, "f" - notch frequency in Hz, "BW" - notch filter window in Hz
+			int BandStop (int sensorValue, float f, float BW);	
+
+			// 6th order lowpass filter, "sensorValue" - signal value, "f" - cutoff frequency in Hz (≥30 Hz)
+			// "type" - filter type: 0 - Butterworth, 1 - Chebyshev with 0.5 dB ripple, 2 - Chebyshev with 1 dB ripple
+			int LowPass (int sensorValue, float f, int type);
+
+			// 4th order bandpass filter, "sensorValue" - signal value, "fl" - lower cutoff frequency in Hz (≥30 Hz), "fh" - upper cutoff frequency in Hz (fh≥(fl+10)),
+			// "type" - filter type: 0 - Butterworth, 1 - Chebyshev with 0.5 dB ripple, 2 - Chebyshev with 1 dB ripple
+			int BandPass (int sensorValue, float fl, float fh, int type);
                         
 		private:
             		byte _cs;			// chip select pin
 			int sensorInPin;		// chip select pin
 	};
-
 	
 #endif
-
