@@ -1,11 +1,11 @@
-//  Terminal with gain
 //  Reads an analog input on pin A0, prints the result to the Serial Monitor.
 //  The sensor gain is controlled by the program.
-//  Graphical representation is available using Matlab Terminal.
+//  Graphical representation is available using Elemyo_GUI, Python_GUI and Matlab_GUI.
 //  2018-04-18 by ELEMYO (https://github.com/ELEMYO/Elemyo-library)
 //
 // Changelog:
-//     2018-04-18 - initial release
+//    2018-04-18 - initial release
+//    2020-06-15 - loop time sending added
 
 /* ============================================
 ELEMYO library code is placed under the MIT license
@@ -46,10 +46,11 @@ ELEMYO -->  Arduino
 #include <ELEMYO.h>
 
 #define   CSpin         10
-#define   sensorInPin   A0     // analog input pin that the sensor is attached to
-#define   timePeriod    1      // frequency of signal update (time in ms)
+#define   sensorInPin   A0      // analog input pin that the sensor is attached to
+#define   timePeriod    0.7     // frequency of signal update (time in ms).
 
-int sensorValue = 0;           // value read from the sensor
+int sensorValue = 0;            // value read from the sensor
+long loopTime=0, sendTime=0;    // values for calculating and sending a time period of one loop
 
 ELEMYO MyoSensor(CSpin);
 
@@ -103,6 +104,14 @@ void loop() {
     }
   }
 
+  if ((micros() - sendTime > 10000) && (micros() < 100000))
+  {
+    sendTime = micros();
+    Serial.print("T");
+    Serial.println(sendTime - loopTime);
+  }
+  loopTime = micros();
+  
   // wait before the next loop
-  delay(timePeriod);
+  delayMicroseconds(timePeriod*1000);
 }
