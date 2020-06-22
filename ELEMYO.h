@@ -64,6 +64,9 @@
 			int LengthBP = 0;				// number of LowPass filters with different lower or upper cutoff frequencys
 			BANDPASS *BP= (BANDPASS *)malloc(1);		// array of LowPass filters with different lower or upper cutoff frequencys
 
+			int LengthMA = 10;                                  // length of moving average massive
+			float MA[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};      // array for moving average method
+		
 			// BandStop filter, "sensorValue" - signal value, "f" - notch frequency in Hz, "BW" - notch filter window in Hz
 			int BandStop (int sensorValue, float f, float BW);	
 
@@ -74,6 +77,9 @@
 			// 4th order bandpass filter, "sensorValue" - signal value, "fl" - lower cutoff frequency in Hz (≥30 Hz), "fh" - upper cutoff frequency in Hz (fh≥(fl+10)),
 			// "type" - filter type: 0 - Butterworth, 1 - Chebyshev with 0.5 dB ripple, 2 - Chebyshev with 1 dB ripple
 			int BandPass (int sensorValue, float fl, float fh, int type);
+		
+		        // Exponential moving average, "sensorValue" - signal value, "signalReference" - reference of signal, "alpha" - smoothing constant
+			int movingAverage (int sensorValue, int signalReference, float alpha);
                         
 		private:
             		byte _cs;			// chip select pin
