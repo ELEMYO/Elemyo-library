@@ -55,7 +55,7 @@ float alpha = 0.93;          // smoothing constant for EMA method
 //---------------------------------------------------------------------------------------------------------------
 
 int signalValue = 0;          // value read from the sensor
-int siganlReference = 516;    // reference of signal, 2.5 V for MYO, MYO-kit, BPM, BPM-kit
+int signalReference = 524;    // reference of signal, 2.5 V for MYO, MYO-kit, BPM, BPM-kit
 //int siganlReference = 369;  // reference of signal, 1.8 V for MH-BPS101 and MH-BPS102
 
 ELEMYO MyoSensor(CSpin);
@@ -66,7 +66,7 @@ void setup() {
   pinMode(sensorInPin, INPUT);     // initialize sensorInPin
 
   for(int i=0; i<3; i++)
-    MA[i] = siganlReference;
+    MA[i] = signalReference;
 }
 
 void loop() {
@@ -78,8 +78,8 @@ void loop() {
   signalValue = MyoSensor.BandStop(signalValue, 100, 6);
 
   // rectification of the signal
-  if (signalValue < siganlReference)
-     signalValue = siganlReference*2 - signalValue;
+  if (signalValue < signalReference)
+     signalValue = signalReference*2 - signalValue;
 
   //--triple exponential moving average-----------
   MA[0] = (1-alpha)*signalValue + alpha*MA[0];
