@@ -5,6 +5,7 @@
 // Changelog:
 //     2020-02-24 - initial release
 //     2020-04-22 - BandStop filter added
+//     2020-06-22 - Moving average added
 
 /* ============================================
 ELEMYO library code is placed under the MIT license
@@ -46,33 +47,28 @@ ELEMYO -->  Arduino
 
 #define   CSpin         10
 #define   sensorInPin   A0     // analog input pin that the sensor is attached to
-#define   timePeriod    1      // frequency of signal update (time in ms)
-
-int sensorValue = 0;           // value read from the sensor
+int signalReference = 524;    // reference of signal, 2.5 V for MYO, MYO-kit, BPM, BPM-kit
+//int signalReference = 369;  // reference of signal, 1.8 V for MH-BPS101 and MH-BPS102
 
 ELEMYO MyoSensor(CSpin);
 
 void setup() {
-  // initialize serial communications at 115200 bps:
-  Serial.begin(115200);
-  // initial value of gain: x1; x2; x4; x5; x8; x10; x16; x32
-  MyoSensor.gain(x1);
-  // initialisation of sensorInPin
-  pinMode(sensorInPin, INPUT);
+  Serial.begin(115200);         // initialize serial communications at 115200 bps:
+  MyoSensor.gain(x1);           // initial value of gain: x1; x2; x4; x5; x8; x10; x16; x32
+  pinMode(sensorInPin, INPUT);   // initialisation of sensorInPin
 }
 
 void loop() {
-  // read the analog in value:
-  sensorValue = analogRead(sensorInPin);
+  int sensorValue = analogRead(sensorInPin);              // read an analog in value:
+  sensorValue = MyoSensor.BandStop(sensorValue, 50, 4);   // notch 50 Hz filter with band window 4 Hz
+  sensorValue = MyoSensor.BandStop(sensorValue, 100, 6);  // notch 100 Hz (one of 50 Hz mode) filter with band window 6 Hz
   
-   // notch 50 Hz filter with band window 4 Hz
-  sensorValue = MyoSensor.BandStop(sensorValue, 50, 4);
-  // notch 100 Hz (one of 50 Hz mode) filter with band window 6 Hz
-  sensorValue = MyoSensor.BandStop(sensorValue, 100, 6);
-
-  // print the results to the Serial Monitor:
-  Serial.println(sensorValue);
-
-  // wait before the next loop
-  delay(timePeriod);
+  // moving average transformation with 0.8 smoothing constant.
+  int sensorValueMA = MyoSensor.movingAverage(sensorValue, signalReference,  0.8); 
+  
+  Serial.print(sensorValue);      // print the results to the Serial Monitor:
+  Serial.print(" ");
+  Serial.println(sensorValueMA + signalReference);    // print the results to the Serial Monitor:
+  
+  delay(1);   // wait before the next loop
 }
