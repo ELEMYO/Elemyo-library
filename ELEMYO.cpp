@@ -385,3 +385,17 @@ int ELEMYO::BandPass (int sensorValue, float fl, float fh, int type)
 	delay(1000000000);
 	return 0;
 }
+
+int ELEMYO::movingAverage (int sensorValue, int signalReference, float alpha)
+{
+    // rectification of the signal
+    if (sensorValue < signalReference)
+        sensorValue = signalReference*2 - sensorValue;
+
+    MA[0] = (1 - alpha)*(sensorValue - signalReference) + alpha*MA[0];
+    for(int i = 1; i < LengthMA; i++)
+    {
+        MA[i] = (1 - alpha)*MA[i-1] + alpha*MA[i];
+    }
+    return MA[2]*4;
+}
