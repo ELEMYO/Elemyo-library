@@ -38,7 +38,7 @@ ELEMYO -->  Arduino
   +        5V
   -        GND
   S        analog pins A0, A1, A2, A3, A4, A5
-  СS       pins        10, 9,  8,  7,  6,  5 (SS pin)
+  СS       pins        10, 9,  8,  7,  6,  5 (SS pins)
   MOSI     pin 11 (UNO, Nano, Mini), pin 51 (Mega), pin SI (Leonardo), pin 16 (Pro micro)
   SCK      pin 13 (UNO, Nano, Mini), pin 52 (Mega), pin SCK (Leonardo), pin 15 (Pro micro)
 
