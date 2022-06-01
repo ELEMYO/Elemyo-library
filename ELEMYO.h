@@ -51,7 +51,8 @@
 	};
 
 	class ELEMYO {
-		public:		
+		public:
+			ELEMYO(){};					// initiate empty object
 			ELEMYO(byte CS);				// initiate object
 			void gain(byte value);				// change gain
 
