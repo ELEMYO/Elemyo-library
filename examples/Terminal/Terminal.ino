@@ -6,7 +6,6 @@
 // Changelog:
 //    2018-04-18 - initial release
 //    2020-06-15 - loop time sending added
-//    2022-05-26 - 6 sensors data channels were added
 
 /* ============================================
 ELEMYO library code is placed under the MIT license
@@ -37,8 +36,8 @@ Wiring the ELEMYO sensor to an Arduino
 ELEMYO -->  Arduino
   +        5V
   -        GND
-  S        analog pins A0, A1, A2, A3, A4, A5
-  СS       pins        10, 9,  8,  7,  6,  5 (SS pins)
+  S        analog pin A0 (or other analog input)
+  СS       pin 10 (SS pin)
   MOSI     pin 11 (UNO, Nano, Mini), pin 51 (Mega), pin SI (Leonardo), pin 16 (Pro micro)
   SCK      pin 13 (UNO, Nano, Mini), pin 52 (Mega), pin SCK (Leonardo), pin 15 (Pro micro)
 
@@ -46,47 +45,73 @@ ELEMYO -->  Arduino
 
 #include <ELEMYO.h>
 
-int CSpin[] = {10, 9, 8, 7, 6, 5};
-int sensorInPin[] = {A0, A1, A2, A3, A4, A5};  // analog input pins that the sensors is attached to
-int sensorsNumber = 1;                         // number of sensors attached to Arduino
-int timePeriod = 100 + 310*sensorsNumber;      // signal sampling time period (in microseconds)
-int sensorGain[] = {x1, x2, x4, x5, x8, x10, x16, x32}; // sensor gain coefficients
-ELEMYO MyoSensor[6];
+#define   CSpin         10
+#define   sensorInPin   A0      // analog input pin that the sensor is attached to
+#define   timePeriod    0.7     // frequency of signal update (time in ms).
+
+int sensorValue = 0;            // value read from the sensor
+long loopTime=0, sendTime=0;    // values for calculating and sending a time period of one loop
+
+ELEMYO MyoSensor(CSpin);
 
 void setup() {
-  Serial.begin(115200);              // initialize serial communications at 115200 bps
-  for (int i = 0; i < 6; i++)
-  {
-    pinMode(sensorInPin[i], INPUT);  // initialize input pins
-    MyoSensor[i] = ELEMYO(CSpin[i]); // initialize sensors and CS pins
-    MyoSensor[i].gain(x1);           // initial sensor gain
-  }
+  // initialize serial communications at 115200 bps:
+  Serial.begin(115200);
+  // Initial value of gain
+  MyoSensor.gain(x1);
+  // initialize sensorInPin
+  pinMode(sensorInPin, INPUT);
 }
 
 void loop() {
-  long Time = micros(); 
-  
-  for (int i = 0; i < sensorsNumber - 1 ; i++)
-  {
-    // read and write to serial sensors signal value
-    Serial.print(analogRead(sensorInPin[i])); 
-    Serial.print(" ");
-  }
+  // read the analog in value:
+  sensorValue = analogRead(sensorInPin);
 
-  // read and write to serial the last sensor signal value
-  Serial.println(analogRead(sensorInPin[sensorsNumber - 1])); 
+  // print the results to the Serial Monitor:
+  Serial.println(sensorValue);
 
-  // checking for input command from ELEMENTO GUI
+  // check for byte in buffer
   if (Serial.available() > 0) {
-    int data = Serial.read(); // read data from serial buffer
-    if (data < 7){
-      sensorsNumber = data;   // set sensors number
-      timePeriod = 100 + 310*sensorsNumber; // change the signal sampling time period
+    // Read gain value from serial buffer
+    int gainValue = Serial.read(); 
+    
+    // Set the gain in the sensor
+    switch(gainValue) { 
+      case 1:
+        MyoSensor.gain(x1);
+        break;
+      case 2:
+        MyoSensor.gain(x2);
+        break;
+      case 4:
+        MyoSensor.gain(x4);
+        break;
+      case 5:
+        MyoSensor.gain(x5);
+        break;
+      case 8:
+        MyoSensor.gain(x8);
+        break;
+      case 10:
+        MyoSensor.gain(x10);
+        break;
+      case 16:
+        MyoSensor.gain(x16);
+        break;
+      case 32:
+        MyoSensor.gain(x32);
+        break;
     }
-    else
-      MyoSensor[int(data/10) - 1].gain(sensorGain[int(data%10)]); // set new sensor gain
   }
 
-  // delay for align sampling time period
-  delayMicroseconds(timePeriod - (micros() - Time) - 12);
+  if ((micros() - sendTime > 10000) && (micros() < 100000))
+  {
+    sendTime = micros();
+    Serial.print("T");
+    Serial.println(sendTime - loopTime);
+  }
+  loopTime = micros();
+  
+  // wait before the next loop
+  delayMicroseconds(timePeriod*1000);
 }
