@@ -1,2 +1,2 @@
-# Arduino 
-Arduino library for the ELEMYO
+# Elemyo library v1.2.0 
+Elemyo library for arduino microcontroller
