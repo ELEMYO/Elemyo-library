@@ -4,19 +4,12 @@
 #include "Arduino.h"
 #include "SPI.h"
 
-//     INITIATION 
 
-ELEMYO::ELEMYO(byte pin) {
-	_cs = pin;				// choose the chip select pin
+void ELEMYO::begin() {
 	pinMode(_cs,OUTPUT);			// set the pin as output
-    	digitalWrite(_cs,HIGH);			// set the pin to default HIGH state
-    	SPI.begin();				// initiate SPI
-
-	BS[0].INITIAL();
+    digitalWrite(_cs,HIGH);			// set the pin to default HIGH state
+    SPI.begin();				// initiate SPI
 	}	
-
-//  PUBLIC  METHODS
-
 
 void ELEMYO::gain(byte value) {
 	digitalWrite(_cs,LOW);			// select CHIP
@@ -47,19 +40,20 @@ int ELEMYO::BandStop (int sensorValue, float f, float BW)
 
 	//----- search for BandStop filter with "f" parameter, that has been created before---------------
 	int i = 0;
-	while(abs(BS[i].f - f) > 0.001 && (i < LengthBS))
-		i++;	
+    while (i < NumBS)
+        if (abs(BS[i].f - f) > 0.001)
+            i++;
+        else
+            break;
 	//------------------------------------------------------------------------------------------------
 
 	//--if filter with notch frequency "f" have not call before, create BANDSTOP element for this "f"----
-	if (i == LengthBS)
+	if (i == NumBS)
 	{
-		LengthBS += 1;
-		BS = (BANDSTOP *)realloc(BS,LengthBS*sizeof(BANDSTOP));
+		NumBS += 1;
 		BS[i].INITIAL();
 		BS[i].f = f;
 	}
-	//-----------------------------------------------------------------------------
 
 	//----time start---------------------------------------------------------------
 	if(BS[i].T == 0)
@@ -114,16 +108,18 @@ int ELEMYO::LowPass (int sensorValue, float f, int type)
 
 	//----- search for LowPass filter with "f" parameter, that has been created before---------------
 	int i = 0;
-	while(abs(LP[i].f - f) > 0.001 && (i < LengthLP))
-		i++;	
+    while (i < NumLP)
+        if (abs(LP[i].f - f) > 0.001)
+            i++;
+        else
+            break;
 	//------------------------------------------------------------------------------------------------
 
 
 	//--if filter with notch frequency "f" have not call before, create LOWPASS element for this "f"----
-	if (i == LengthLP)
+	if (i == NumLP)
 	{
-		LengthLP += 1;
-		LP = (LOWPASS *) realloc(LP,LengthLP*sizeof(LOWPASS));
+		NumLP += 1;
 		LP[i].INITIAL();
 		LP[i].f = f;
 	}
@@ -268,18 +264,20 @@ void BANDPASS::INITIAL(){
 
 int ELEMYO::BandPass (int sensorValue, float fl, float fh, int type)
 {  
-
 	//----- search for BandPass filter with "f" parameter, that has been created before---------------
 	int i = 0;
-	while((abs(BP[i].fl-fl) + abs(BP[i].fh-fh))>0.001 && (i<LengthBP))
-		i++;	
+	if (i < NumBP)
+    while (i < NumBP)
+        if ((abs(BP[i].fl - fl) + abs(BP[i].fh - fh)) > 0.001)
+            i++;
+        else
+            break;
 	//------------------------------------------------------------------------------------------------
-	
+
 	//--if filter with notch frequency "f" have not call before, create BANPASS element for this "f"----
-	if (i == LengthBP)
+	if (i == NumBP)
 	{
-		LengthBP+=1;
-		BP = (BANDPASS *) realloc(BP,LengthBP*sizeof(BANDPASS));
+		NumBP += 1;
 		BP[i].INITIAL();
 		BP[i].fl = fl;
 		BP[i].fh = fh;
@@ -386,13 +384,81 @@ int ELEMYO::BandPass (int sensorValue, float fl, float fh, int type)
 	return 0;
 }
 
-int ELEMYO::movingAverage (int sensorValue, int signalReference, float alpha)
-{
-    // rectification of the signal
-    if (sensorValue < signalReference)
-        sensorValue = signalReference*2 - sensorValue;
+void HIGHPASS::INITIAL(){
 
-    MA[0] = (1 - alpha)*(sensorValue - signalReference) + alpha*MA[0];
+	//---initialization of values: x(n-1) ... x(n-6), y(n-1) ... y(n-6)---------------
+    Y[0] = 0;
+    Y[1] = 0;
+    X[0] = 0;
+	//---------------------------------------------------------------------------------
+
+	T = 0;			// initialization of time
+	f = 0;			// initialization of cutoff friquency
+}
+
+int ELEMYO::HighPass (int sensorValue, float f) {
+
+	//----- search for BandStop filter with "f" parameter, that has been created before---------------
+	int i = 0;
+    while (i < NumHP)
+        if (abs(HP[i].f - f) > 0.001)
+            i++;
+        else
+            break;
+	//------------------------------------------------------------------------------------------------
+
+	//--if filter with notch frequency "f" have not call before, create BANDSTOP element for this "f"----
+	if (i == NumHP)
+	{
+		NumHP += 1;
+		HP[i].INITIAL();
+		HP[i].f = f;
+	}
+	//-----------------------------------------------------------------------------
+
+	if (NumBS == 3)
+	{
+	    Serial.println("Error: too much HighPass filters!");
+        delay(1000);
+	}
+
+	//----time start---------------------------------------------------------------
+	if(HP[i].T == 0)
+	{
+		HP[i].T = micros();
+		return sensorValue;
+	}
+	//-----------------------------------------------------------------------------
+
+ 	short DT = micros()-HP[i].T;			// time period from previous function call
+ 	float fs = 1000000.0/DT;			// sampling frequency
+
+	HP[i].T = micros();				// time of function call
+
+	//---Calculation of filter coefficients------------------------------------------
+	float wa = 2.0*fs*tan(3.1416*f/fs);
+	//--------------------------------------------------------------------------------
+
+
+	HP[i].Y[1] = (2*fs*(sensorValue - HP[i].X[0]) - (wa-2*fs)*HP[i].Y[0])/(2*fs+wa);	//The new signal value after filtering
+
+	//---save these values: x(n-1), x(n-2), y(n-1), y(n-2)---------------------------
+	HP[i].Y[0] = HP[i].Y[1];
+	HP[i].X[0] = sensorValue;
+	//--------------------------------------------------------------------------------
+
+	return (int) HP[i].Y[1];
+}
+
+int ELEMYO::movingAverage (int sensorValue, float alpha) {
+
+    sensorValue = HighPass(sensorValue, 0.99);
+
+    // rectification of the signal
+    if (sensorValue < 0)
+        sensorValue = - sensorValue;
+
+    MA[0] = (1 - alpha)*(sensorValue) + alpha*MA[0];
     for(int i = 1; i < LengthMA; i++)
     {
         MA[i] = (1 - alpha)*MA[i-1] + alpha*MA[i];
