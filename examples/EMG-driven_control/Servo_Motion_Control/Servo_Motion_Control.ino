@@ -43,34 +43,33 @@ Sensor -->  Arduino
 #include <ELEMYO.h>
 #include <Servo.h>
 
-#define   CSpin         10
-#define   sensorInPin   A0     // analog input pin that the sensor is attached to
-
-int signalReference = 524;    // reference of signal, 2.5 V for MYO, MYO-kit, BPM, BPM-kit
-//int signalReference = 369;  // reference of signal, 1.8 V for MH-BPS101 and MH-BPS102
+#define   CSpin         10      // chip select pin connected to MYO sensor
+#define   EMG_PIN       A0      // analog pin connected to MYO sensor
+#define   EMG_MAX       200     // Adjust based on your muscle signal
 
 ELEMYO MyoSensor(CSpin);      // create ELEMYO object to work with signal
 Servo myservo;                // create servo object to control a servo
 
 void setup() {
   Serial.begin(115200);           // initialize serial communications at 115200 bps
+  MyoSensor.begin();
   MyoSensor.gain(x2);             // initial value of gain
-  pinMode(sensorInPin, INPUT);    // initialize sensorInPin
+  pinMode(EMG_PIN, INPUT);    // initialize sensorInPin
   myservo.attach(5);              // attaches the servo on pin 5 to the servo object
 }
 
 void loop() {
-  int signalValue = analogRead(sensorInPin);                // read the analog in value:
+  int signalValue = analogRead(EMG_PIN);                // read the analog in value:
   signalValue = MyoSensor.BandStop(signalValue, 50, 4);     // notch 50 Hz filter with band window 4 Hz.  
   signalValue = MyoSensor.BandStop(signalValue, 100, 6);    // notch 100 Hz (one of 50 Hz mode) filter with band window 6 Hz
 
-  int signalValueMA = MyoSensor.movingAverage(signalValue, signalReference,  0.98); // moving average transformation with 0.98 smoothing constant
+  int signalValueMA = MyoSensor.movingAverage(signalValue,  0.98); // moving average transformation with 0.98 smoothing constant
 
-  Serial.print(signalValue);                          // print the signal to the Serial Monitor:
+  Serial.print(signalValue - 504);                          // print the signal to the Serial Monitor:
   Serial.print(" ");
-  Serial.println(signalValueMA + signalReference);    // print the signal value after moving average transformation to the Serial Monitor:
+  Serial.println(signalValueMA);    // print the signal value after moving average transformation to the Serial Monitor:
 
-  int val = map(signalValueMA, 0, 1024, 0, 180);      // scale signalValueMA to use it with the servo (value between 0 and 180)
+  int val = map(signalValueMA, 0, EMG_MAX, 0, 180);      // scale signalValueMA to use it with the servo (value between 0 and 180)
   myservo.write(val);                                 // sets the servo position according to the scaled value
   
   delay(1);      // wait before the next loop
