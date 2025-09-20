@@ -45,8 +45,8 @@ Sensor -->  Arduino
 
 #define   CSpin         10      // chip select pin connected to MYO sensor
 #define   EMG_PIN       A0      // analog pin connected to MYO sensor
-#define   EMG_MAX       200     // Adjust based on your muscle signal
 #define   SERVO_PIN     5       // PWM pin connected to servo
+#define   EMG_MAX       200     // Adjust based on your muscle signal
 
 ELEMYO MyoSensor(CSpin);      // create ELEMYO object to work with signal
 Servo myservo;                // create servo object to control a servo
