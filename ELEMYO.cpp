@@ -8,7 +8,7 @@
 void ELEMYO::begin() {
 	pinMode(_cs,OUTPUT);			// set the pin as output
     digitalWrite(_cs,HIGH);			// set the pin to default HIGH state
-    SPI.begin();				// initiate SPI
+    SPI.begin();					// initiate SPI
 	}	
 
 void ELEMYO::gain(byte value) {
