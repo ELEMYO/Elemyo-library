@@ -43,20 +43,21 @@ Sensor -->  Arduino
 #include <ELEMYO.h>
 #include <Servo.h>
 
-#define   CSpin         10     // chip select pin
-#define   sensorInPin   A0     // analog input pin that the sensor is attached to
+#define   CSpin           10      // chip select pin connected to MYO sensor
+#define   EMG_PIN         A0      // analog pin connected to MYO sensor
+#define   THRESHOLD       200     // Adjust based on your muscle signal
+#define   Time_THRESHOLD  500
 
-int signalReference = 524;    // reference of signal, 2.5 V for MYO, MYO-kit, BPM, BPM-kit
-//int signalReference = 369;  // reference of signal, 1.8 V for MH-BPS101 and MH-BPS102
-long timer = 0;               // time length of EMG signal
+long timer = 0;               // EMG signal duration
 
 ELEMYO MyoSensor(CSpin);      // create ELEMYO object to work with signal
 Servo myservo;                // create servo object to control a servo
 
 void setup() {
   Serial.begin(115200);           // initialize serial communications at 115200 bps
+  MyoSensor.begin();
   MyoSensor.gain(x2);             // initial value of gain
-  pinMode(sensorInPin, INPUT);    // initialize sensorInPin
+  pinMode(EMG_PIN, INPUT);    // initialize sensorInPin
   myservo.attach(5);              // attaches the servo on pin 5 to the servo object
 
   Serial.println("Type 1 - short muscle contraction");
@@ -64,20 +65,20 @@ void setup() {
 }
 
 void loop() {
-  int signalValue = analogRead(sensorInPin);                // read the analog in value:
+  int signalValue = analogRead(EMG_PIN);                // read the analog in value:
   signalValue = MyoSensor.BandStop(signalValue, 50, 4);     // notch 50 Hz filter with band window 4 Hz.  
   signalValue = MyoSensor.BandStop(signalValue, 100, 6);    // notch 100 Hz (one of 50 Hz mode) filter with band window 6 Hz
 
-  int signalValueMA = MyoSensor.movingAverage(signalValue, signalReference,  0.92); // moving average transformation with 0.92 smoothing constant
+  int signalValueMA = MyoSensor.movingAverage(signalValue, 0.92); // moving average transformation with 0.92 smoothing constant
 
   // start timer if EMG amplitude is greater than the given threshold and it is new start of EMG signal
-  if (signalValueMA >= 200 && timer == 0)
+  if (signalValueMA >= THRESHOLD && timer == 0)
       timer = millis();
 
   // if EMG amplitude is bellow than the given threshold
-  if (signalValueMA < 200 && timer != 0)
+  if (signalValueMA < THRESHOLD && timer != 0)
   {
-    if ((millis() - timer) < 500) // if EMG time length less then 0.5 c
+    if ((millis() - timer) < Time_THRESHOLD ) // if EMG time length less then 0.5 c
     {
       Serial.println("Type 1");
       myservo.write(10);
