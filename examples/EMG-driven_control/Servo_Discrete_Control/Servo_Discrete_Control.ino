@@ -45,6 +45,7 @@ Sensor -->  Arduino
 
 #define   CSpin           10      // chip select pin connected to MYO sensor
 #define   EMG_PIN         A0      // analog pin connected to MYO sensor
+#define   SERVO_PIN       5       // PWM pin connected to servo
 #define   THRESHOLD       200     // Adjust based on your muscle signal
 #define   Time_THRESHOLD  500
 
@@ -58,7 +59,7 @@ void setup() {
   MyoSensor.begin();
   MyoSensor.gain(x2);             // initial value of gain
   pinMode(EMG_PIN, INPUT);    // initialize sensorInPin
-  myservo.attach(5);              // attaches the servo on pin 5 to the servo object
+  myservo.attach(SERVO_PIN);              // attaches the servo on pin 5 to the servo object
 
   Serial.println("Type 1 - short muscle contraction");
   Serial.println("Type 2 - long muscle contraction");
