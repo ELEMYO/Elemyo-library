@@ -51,12 +51,12 @@ ELEMYO -->  Arduino
 #define   CSpin6         5
 
 // analog input pins that the sensors are attached to:
-#define   sensorInPin1   A0     
-#define   sensorInPin2   A1    
-#define   sensorInPin3   A2    
-#define   sensorInPin4   A3     
-#define   sensorInPin5   A4     
-#define   sensorInPin6   A5     
+#define   EMG_PIN_1       A0      // analog pin connected to MYO sensor 1 
+#define   EMG_PIN_2       A1      // analog pin connected to MYO sensor 2 
+#define   EMG_PIN_3       A2      // analog pin connected to MYO sensor 3 
+#define   EMG_PIN_4       A3      // analog pin connected to MYO sensor 4 
+#define   EMG_PIN_5       A4      // analog pin connected to MYO sensor 5 
+#define   EMG_PIN_6       A5      // analog pin connected to MYO sensor 6    
 
 int sensorValue1 = 0;           // value read from the sensor 1
 int sensorValue2 = 0;           // value read from the sensor 2
@@ -77,6 +77,13 @@ void setup() {
   
   // initialize serial communications at 115200 bps:
   Serial.begin(115200);
+
+  MyoSensor1.begin();
+  MyoSensor2.begin();
+  MyoSensor3.begin();
+  MyoSensor4.begin();
+  MyoSensor5.begin();
+  MyoSensor6.begin();
   
   // initial value of gain: x1; x2; x3; x4; x5; x8; x10; x16; x32
   MyoSensor1.gain(x1);
@@ -87,24 +94,23 @@ void setup() {
   MyoSensor6.gain(x1);
   
   // initialisation of sensors input pins:
-  pinMode(sensorInPin1, INPUT);
-  pinMode(sensorInPin2, INPUT);
-  pinMode(sensorInPin3, INPUT);
-  pinMode(sensorInPin4, INPUT);
-  pinMode(sensorInPin5, INPUT);
-  pinMode(sensorInPin6, INPUT);
-  
+  pinMode(EMG_PIN_1, INPUT);
+  pinMode(EMG_PIN_2, INPUT);
+  pinMode(EMG_PIN_3, INPUT);
+  pinMode(EMG_PIN_4, INPUT);
+  pinMode(EMG_PIN_5, INPUT);
+  pinMode(EMG_PIN_6, INPUT);
 }
 
 void loop() {
 
   // read the analog in value:
-  sensorValue1 = analogRead(sensorInPin1);
-  sensorValue2 = analogRead(sensorInPin2);
-  sensorValue3 = analogRead(sensorInPin3);
-  sensorValue4 = analogRead(sensorInPin4);
-  sensorValue5 = analogRead(sensorInPin5);
-  sensorValue6 = analogRead(sensorInPin6);
+  sensorValue1 = analogRead(EMG_PIN_1);
+  sensorValue2 = analogRead(EMG_PIN_2);
+  sensorValue3 = analogRead(EMG_PIN_3);
+  sensorValue4 = analogRead(EMG_PIN_4);
+  sensorValue5 = analogRead(EMG_PIN_5);
+  sensorValue6 = analogRead(EMG_PIN_6);
   
   // notch 50 Hz filter with band window 4 Hz
   sensorValue1 = MyoSensor1.BandStop(sensorValue1, 50, 4);
@@ -113,14 +119,6 @@ void loop() {
   sensorValue4 = MyoSensor4.BandStop(sensorValue4, 50, 4);
   sensorValue5 = MyoSensor5.BandStop(sensorValue5, 50, 4);
   sensorValue6 = MyoSensor6.BandStop(sensorValue6, 50, 4);
-
-  // notch 100 Hz (one of 50 Hz mode) filter with band window 6 Hz
-  sensorValue1 = MyoSensor1.BandStop(sensorValue1, 100, 6);
-  sensorValue2 = MyoSensor2.BandStop(sensorValue2, 100, 6);
-  sensorValue3 = MyoSensor3.BandStop(sensorValue3, 100, 6);
-  sensorValue4 = MyoSensor4.BandStop(sensorValue4, 100, 6);
-  sensorValue5 = MyoSensor5.BandStop(sensorValue5, 100, 6);
-  sensorValue6 = MyoSensor6.BandStop(sensorValue6, 100, 6);
   
   Serial.print(sensorValue1+500);
   Serial.print(" ");
