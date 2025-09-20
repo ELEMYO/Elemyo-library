@@ -46,6 +46,7 @@ Sensor -->  Arduino
 #define   CSpin         10      // chip select pin connected to MYO sensor
 #define   EMG_PIN       A0      // analog pin connected to MYO sensor
 #define   EMG_MAX       200     // Adjust based on your muscle signal
+#define   SERVO_PIN     5       // PWM pin connected to servo
 
 ELEMYO MyoSensor(CSpin);      // create ELEMYO object to work with signal
 Servo myservo;                // create servo object to control a servo
@@ -54,8 +55,8 @@ void setup() {
   Serial.begin(115200);           // initialize serial communications at 115200 bps
   MyoSensor.begin();
   MyoSensor.gain(x2);             // initial value of gain
-  pinMode(EMG_PIN, INPUT);    // initialize sensorInPin
-  myservo.attach(5);              // attaches the servo on pin 5 to the servo object
+  pinMode(EMG_PIN, INPUT);        // initialize sensorInPin
+  myservo.attach(SERVO_PIN);      // attaches the servo on pin 5 to the servo object
 }
 
 void loop() {
